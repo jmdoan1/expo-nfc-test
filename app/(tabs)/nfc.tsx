@@ -17,8 +17,17 @@ export default function NfcTestScreen() {
     try {
       await NfcManager.requestTechnology(NfcTech.Ndef);
       const tag = await NfcManager.getTag();
-      setNfcMessage(JSON.stringify(tag));
-      Alert.alert("NFC Tag Read", JSON.stringify(tag));
+      let message = JSON.stringify(tag);
+
+      // Try to decode NDEF text payload
+      if (tag?.ndefMessage && tag.ndefMessage.length > 0) {
+        const payload = tag.ndefMessage[0].payload;
+        const text = Ndef.text.decodePayload(Uint8Array.from(payload));
+        message = `Text: ${text}\nRaw: ${JSON.stringify(tag)}`;
+      }
+
+      setNfcMessage(message);
+      Alert.alert("NFC Tag Read", message);
     } catch (ex) {
       Alert.alert("Error", "Failed to read NFC");
     } finally {
