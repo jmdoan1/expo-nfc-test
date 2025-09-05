@@ -9,16 +9,19 @@ import {
 } from "react-native";
 import WalletManager from "react-native-wallet-manager";
 
-const PKPASS_URL =
-  "https://github.com/dev-family/react-native-wallet-manager/blob/main/example/resources/pass.pkpass?raw=true";
-// Replace with a valid JWT for Google Wallet testing
+const CARD_IDENTIFIER = "pass.haus.logica.exponfctest";
 
-const CARD_IDENTIFIER = "pass.family.dev.walletManager";
-const CARD_SERIAL = "serial201";
+const PKPASS_URL_1 = "https://www.logica.haus/test/TestPass.pkpass";
+// const PKPASS_URL_2 = "https://www.logica.haus/test/TestPass2.pkpass";
+const PKPASS_URL_2 = "https://www.logica.haus/test/FinalTestPass2.pkpass";
+
+const CARD_SERIAL_1 = "serial201";
+const CARD_SERIAL_2 = "serial202";
 
 export default function WalletScreen() {
   const [canAdd, setCanAdd] = useState<boolean | null>(null);
-  const [hasPass, setHasPass] = useState<boolean | null>(null);
+  const [hasPass1, setHasPass1] = useState<boolean | null>(null);
+  const [hasPass2, setHasPass2] = useState<boolean | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [resultMsg, setResultMsg] = useState<string | null>(null);
 
@@ -36,6 +39,82 @@ export default function WalletScreen() {
       setLoading(null);
     }
   };
+
+  const renderPassActions = (
+    label: string,
+    pkpassUrl: string,
+    cardSerial: string,
+    hasPassState: boolean | null,
+    setHasPassState: React.Dispatch<React.SetStateAction<boolean | null>>
+  ) => (
+    <View style={styles.passRow}>
+      <Text style={styles.passLabel}>{label}</Text>
+      <TouchableOpacity
+        style={[styles.buttonSmall, loading ? styles.buttonDisabled : {}]}
+        onPress={() =>
+          handle(async () => {
+            const result = await WalletManager.addPassFromUrl(pkpassUrl);
+            return "Add Pass: " + JSON.stringify(result);
+          }, `Adding ${label}...`)
+        }
+        disabled={!!loading}
+      >
+        <Text style={styles.buttonTextSmall}>Add</Text>
+      </TouchableOpacity>
+      {Platform.OS === "ios" && (
+        <>
+          <TouchableOpacity
+            style={[styles.buttonSmall, loading ? styles.buttonDisabled : {}]}
+            onPress={() =>
+              handle(async () => {
+                const result = await WalletManager.hasPass(
+                  CARD_IDENTIFIER,
+                  cardSerial
+                );
+                setHasPassState(result);
+                return "Has Pass: " + (result ? "Yes" : "No");
+              }, `Checking ${label}...`)
+            }
+            disabled={!!loading}
+          >
+            <Text style={styles.buttonTextSmall}>Check</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.buttonSmall, loading ? styles.buttonDisabled : {}]}
+            onPress={() =>
+              handle(async () => {
+                const result = await WalletManager.removePass(CARD_IDENTIFIER);
+                return "Remove Pass: " + JSON.stringify(result);
+              }, `Removing ${label}...`)
+            }
+            disabled={!!loading}
+          >
+            <Text style={styles.buttonTextSmall}>Remove</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.buttonSmall, loading ? styles.buttonDisabled : {}]}
+            onPress={() =>
+              handle(async () => {
+                const result = await WalletManager.viewInWallet(
+                  CARD_IDENTIFIER
+                );
+                return "View Pass: " + JSON.stringify(result);
+              }, `Opening ${label}...`)
+            }
+            disabled={!!loading}
+          >
+            <Text style={styles.buttonTextSmall}>View</Text>
+          </TouchableOpacity>
+        </>
+      )}
+      <View style={styles.passStatus}>
+        <Text style={styles.statusLabel}>Has Pass:</Text>
+        <Text style={styles.statusValue}>
+          {hasPassState === null ? "Unknown" : hasPassState ? "Yes" : "No"}
+        </Text>
+      </View>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
@@ -60,79 +139,25 @@ export default function WalletScreen() {
           >
             <Text style={styles.buttonText}>Check if can add passes</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, loading ? styles.buttonDisabled : {}]}
-            onPress={() =>
-              handle(async () => {
-                const result = await WalletManager.addPassFromUrl(PKPASS_URL);
-                return "Add Pass: " + JSON.stringify(result);
-              }, "Adding Pass...")
-            }
-            disabled={!!loading}
-          >
-            <Text style={styles.buttonText}>Add Pass from URL</Text>
-          </TouchableOpacity>
-          {Platform.OS === "ios" && (
-            <>
-              <TouchableOpacity
-                style={[styles.button, loading ? styles.buttonDisabled : {}]}
-                onPress={() =>
-                  handle(async () => {
-                    const result = await WalletManager.hasPass(
-                      CARD_IDENTIFIER,
-                      CARD_SERIAL
-                    );
-                    setHasPass(result);
-                    return "Has Pass: " + (result ? "Yes" : "No");
-                  }, "Checking Pass...")
-                }
-                disabled={!!loading}
-              >
-                <Text style={styles.buttonText}>Check if pass exists</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, loading ? styles.buttonDisabled : {}]}
-                onPress={() =>
-                  handle(async () => {
-                    const result = await WalletManager.removePass(
-                      CARD_IDENTIFIER
-                    );
-                    return "Remove Pass: " + JSON.stringify(result);
-                  }, "Removing Pass...")
-                }
-                disabled={!!loading}
-              >
-                <Text style={styles.buttonText}>Remove Pass</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, loading ? styles.buttonDisabled : {}]}
-                onPress={() =>
-                  handle(async () => {
-                    const result = await WalletManager.viewInWallet(
-                      CARD_IDENTIFIER
-                    );
-                    return "View Pass: " + JSON.stringify(result);
-                  }, "Opening Wallet...")
-                }
-                disabled={!!loading}
-              >
-                <Text style={styles.buttonText}>View Pass in Wallet</Text>
-              </TouchableOpacity>
-            </>
+          {renderPassActions(
+            "Pass 1",
+            PKPASS_URL_1,
+            CARD_SERIAL_1,
+            hasPass1,
+            setHasPass1
+          )}
+          {renderPassActions(
+            "Pass 2",
+            PKPASS_URL_2,
+            CARD_SERIAL_2,
+            hasPass2,
+            setHasPass2
           )}
           <View style={styles.statusBox}>
             <Text style={styles.statusLabel}>Can Add Passes:</Text>
             <Text style={styles.statusValue}>
               {canAdd === null ? "Unknown" : canAdd ? "Yes" : "No"}
             </Text>
-            {Platform.OS === "ios" && (
-              <>
-                <Text style={styles.statusLabel}>Has Pass:</Text>
-                <Text style={styles.statusValue}>
-                  {hasPass === null ? "Unknown" : hasPass ? "Yes" : "No"}
-                </Text>
-              </>
-            )}
             {loading && <Text style={styles.loadingText}>{loading}</Text>}
             {resultMsg && <Text style={styles.resultText}>{resultMsg}</Text>}
           </View>
@@ -197,6 +222,37 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "600",
+  },
+  passRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    backgroundColor: "#222",
+    borderRadius: 8,
+    padding: 8,
+  },
+  passLabel: {
+    color: "#fff",
+    fontWeight: "bold",
+    marginRight: 8,
+    minWidth: 60,
+  },
+  buttonSmall: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: "#007AFF",
+    borderRadius: 6,
+    alignItems: "center",
+    marginRight: 6,
+  },
+  buttonTextSmall: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  passStatus: {
+    marginLeft: 8,
+    alignItems: "flex-start",
   },
   statusBox: {
     marginTop: 16,

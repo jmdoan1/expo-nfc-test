@@ -1,0 +1,39 @@
+{
+  "description": "DayOf Event Pass NO. 2",
+  "formatVersion": 1,
+  "organizationName": "haus.logica",
+  "passTypeIdentifier": "pass.haus.logica.exponfctest",
+  "serialNumber": "serial202",
+  "teamIdentifier": "28SGD9V9Q9",
+  "foregroundColor": "rgb(255, 255, 255)",
+  "backgroundColor": "rgb(54, 28, 165)",
+  "labelColor": "rgb(255, 255, 255)",
+  "barcode": {
+    "message": "We did it reddit",
+    "format": "PKBarcodeFormatQR",
+    "messageEncoding": "iso-8859-1"
+  },
+  "generic": {
+    "primaryFields": [
+      {
+        "key": "attendee",
+        "label": "Attendee",
+        "value": "His Holiness Dali Lama"
+      }
+    ],
+    "secondaryFields": [
+      {
+        "key": "event",
+        "label": "Event Name",
+        "value": "DayOf Test Event NO. 2"
+      }
+    ],
+    "backFields": [
+      {
+        "key": "info",
+        "label": "Additional Information",
+        "value": "This is an event held at a place at a time."
+      }
+    ]
+  }
+}
